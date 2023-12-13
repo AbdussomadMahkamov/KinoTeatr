@@ -59,13 +59,32 @@ export default function App(){
         <QidiruvNatija kinolar={kinolar}/>
       </Navbar>
       <Main>
-        <Box1 >
+        <Box>
+          <KinolarList kinolar={kinolar}/>
+        </Box>
+        <Box>
+          <Xulosa kurilganKinolar={kurilganKinolar}/>
+          <KinolarKurilganList kurilganKinolar={kurilganKinolar}/>
+        </Box>
+
+        {/* 2-usul */}
+        {/* <Box element={<KinolarList kinolar={kinolar}/>}/>
+        <Box element={
+          <>
+          <Xulosa kurilganKinolar={kurilganKinolar}/>
+          <KinolarKurilganList kurilganKinolar={kurilganKinolar}/>
+          </>
+        } /> */}
+
+
+        {/* 1-usul */}
+        {/* <Box1 >
           <KinolarList kinolar={kinolar}/>
         </Box1>
         <Box2>
           <Xulosa kurilganKinolar={kurilganKinolar}/>
           <KinolarKurilganList kurilganKinolar={kurilganKinolar}/>
-        </Box2>
+        </Box2> */}
       </Main>
     </>
   );
@@ -117,7 +136,7 @@ function Main({children}){
   )
 }
 
-function Box1({children}){
+function Box({children}){
   const [ochish, setOchish] = useState(true);
   return(
     <div className="box">
@@ -128,6 +147,22 @@ function Box1({children}){
     </div>
   )
 }
+
+// function Box2({children}){
+//   const [ochish2, setOchish2] = useState(true);
+//   return (
+//     <div className="box">
+//       <button className="btn-toggle" onClick={()=>setOchish2((ochish)=>!ochish)} >
+//       {ochish2?"➖":"➕"}
+//       </button>
+//       { ochish2 && 
+//         <>
+//         {children}
+//         </> 
+//       }
+//     </div>
+//   )
+// }
 
 function KinolarList({kinolar}){
   return(
@@ -153,22 +188,6 @@ function KinoList({kino}){
         </p>
       </div>
     </li>
-  )
-}
-
-function Box2({children}){
-  const [ochish2, setOchish2] = useState(true);
-  return (
-    <div className="box">
-      <button className="btn-toggle" onClick={()=>setOchish2((ochish)=>!ochish)} >
-      {ochish2?"➖":"➕"}
-      </button>
-      { ochish2 && 
-        <>
-        {children}
-        </> 
-      }
-    </div>
   )
 }
 
