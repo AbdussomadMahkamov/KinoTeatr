@@ -8,44 +8,57 @@ const containerStyle = {
 const yulduzchaContainerStyle = {
     display: "Flex",
 }
-const textStyle = {
-    lineHeight:"1",
-    margin: "0px",
-}
 
-export default function YulduzchaliBaholash({maxSize}){
+
+export default function YulduzchaliBaholash({maxSize, color="gold", size=48, xabar=[]}){
     const [baho, SetBaho] = useState(0);
+    const [tempBaho, setTempBaho] = useState(0);
     function Baholash(baholash){
         SetBaho(baholash);
+    }
+    const textStyle = {
+        lineHeight:"1",
+        margin: "5px",
+        color,
+        fontSize: `${size/1.5}px`,
     }
     return(
         <div style={containerStyle}>
             <div style={yulduzchaContainerStyle}>
                 {Array.from({length:maxSize},(_,i)=>(
-                    <Yulduzchalar onBaho={()=>Baholash(i+1)}
-                    tuliq={baho>=i+1}/>
+                    <Yulduzchalar 
+                    onBaho={()=>Baholash(i+1)}
+                    tuliq={tempBaho?tempBaho>=i+1:baho>=i+1}
+                    onHoverIn = {()=>setTempBaho(i+1)}
+                    onHoverOut = {()=>setTempBaho(0)}
+                    color={color}
+                    size={size}
+                    />
                 ))}
             </div>
-            <p style={textStyle}> {baho || ""}</p>
+            <p style={textStyle}> {xabar.length === maxSize? xabar[tempBaho ? tempBaho-1 : baho-1] : tempBaho || ""}</p>
         </div>
     )
 }
 
-const yulduzchaStyle = {
-    width: "48px",
-    height: "48px",
-    display: "black",
-    cursor: "pointer"
-}
-function Yulduzchalar({onBaho, tuliq}){
+
+function Yulduzchalar({onBaho, tuliq, onHoverIn, onHoverOut, color, size}){
+    const yulduzchaStyle = {
+        width: `${size}px`,
+        height: `${size}px`,
+        display: "black",
+        cursor: "pointer"
+    }
     return(
-        <span role="button" onClick={onBaho} style={yulduzchaStyle}>
+        <span role="button" onClick={onBaho} style={yulduzchaStyle}
+        onMouseEnter={onHoverIn} onMouseLeave={onHoverOut}
+        >
             {tuliq?(
                 <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
-                fill="gold"
-                stroke="goldenrod"
+                fill={color}
+                stroke={color}
                 >
                 <path
                     d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
@@ -56,7 +69,7 @@ function Yulduzchalar({onBaho, tuliq}){
                  xmlns="http://www.w3.org/2000/svg"
                  fill="none"
                  viewBox="0 0 24 24"
-                 stroke="#000"
+                 stroke={color}
                >
                  <path
                    strokeLinecap="round"

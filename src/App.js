@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const kinolarRuyhati = [
   {
@@ -47,23 +47,60 @@ const kurilganKinolarRuyhati = [
   },
 ];
 const urtacha =(massiv)=>massiv.reduce((a,b,c,massiv)=>a+b/massiv.length,0);
+const KEY="92d61c80"
+
+// fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=Terminator`);
+// .then((e)=>e.json()).then((data)=>console.log(data));
+const query="sdkhkshjk";
 
 export default function App(){
   const [kinolar, setKinolar] = useState(kinolarRuyhati);
   const [kurilganKinolar, setKurilganKinolar] = useState(kurilganKinolarRuyhati);
+  const [yuklash, setYuklash] = useState(false);
+  const [error, setError] = useState("");
+  const [qidiruv, setQidiruv] = useState("");
+  useEffect(function(){
+    
+    async function fetchKinolar(){
+      try{
+        setYuklash(true);
+        setError("");
+        const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${qidiruv}`);
+      if(!res.ok) throw new Error("Ma'lumotlarni yuklashda xatolik yuzaga keldi!");
+      const data = await res.json();
+      if(data.Response === 'False') throw new Error("Siz qidirgan kino topilmadi");
+      setKinolar(data.Search);
+      // console.log(data);
+      }
+      catch(err){
+        console.error(err);
+        setError(err.message);
+      }
+      finally{
+        setYuklash(false);
+      }
+    }
+    fetchKinolar();
+    
+  },[qidiruv])
+  
   return(
     <>
       <Navbar>
         <Logo/>
-        <Qidiruv/>
+        <Qidiruv qidiruv={qidiruv} setQidiruv={setQidiruv}/>
         <QidiruvNatija kinolar={kinolar}/>
       </Navbar>
       <Main>
+
         <Box>
-          <KinolarList kinolar={kinolar}/>
+        {/* { yuklash ? <Yuklovchi/> : <KinolarList kinolar={kinolar}/>} */}
+        {yuklash && <Yuklovchi/>}
+        {!yuklash && !error && <KinolarList kinolar={kinolar}/>}
+        {error && qidiruv ? <ErrorMessage message={error} /> : ""}
         </Box>
         <Box>
-          <Xulosa kurilganKinolar={kurilganKinolar}/>
+        <Xulosa kurilganKinolar={kurilganKinolar}/>
           <KinolarKurilganList kurilganKinolar={kurilganKinolar}/>
         </Box>
 
@@ -75,7 +112,6 @@ export default function App(){
           <KinolarKurilganList kurilganKinolar={kurilganKinolar}/>
           </>
         } /> */}
-
 
         {/* 1-usul */}
         {/* <Box1 >
@@ -90,6 +126,17 @@ export default function App(){
   );
 }
 
+function Yuklovchi(){
+  return <p className="loader">Yuklanmoqda</p>
+}
+
+function ErrorMessage({message}){
+  return(
+    <p className="error">
+      <span>⚠️</span>Xatolik
+    </p>
+  )
+}
 function Navbar({children}){
   return (
     <nav className="nav-bar">
@@ -107,8 +154,8 @@ function Logo(){
   )
 }
 
-function Qidiruv(){
-  const [qidiruv, setQidiruv] = useState("");
+function Qidiruv({qidiruv, setQidiruv}){
+  
   return (
     <input 
     className="search" 
@@ -169,7 +216,7 @@ function KinolarList({kinolar}){
     <ul className="list">
       {
         kinolar.map((kino)=>(
-          <KinoList kino={kino} key={kino.id}/>
+          <KinoList kino={kino} key={kino.imdbID}/>
         ))
       }
     </ul> 
@@ -179,12 +226,12 @@ function KinolarList({kinolar}){
 function KinoList({kino}){
   return (
     <li>
-      <img src={kino.rasmi} alt={kino.nomi}/>
-      <h3>{kino.nomi}</h3>
+      <img src={kino.Poster} alt={kino.Title}/>
+      <h3>{kino.Title}</h3>
       <div>
         <p>
           <span>📆</span>
-          <span>{kino.yili}</span>
+          <span>{kino.Year}</span>
         </p>
       </div>
     </li>
@@ -195,7 +242,7 @@ function KinolarKurilganList({kurilganKinolar}){
   return (
     <ul className="list">
       {kurilganKinolar.map((kino)=>(
-        <KinoKurilganList kino={kino} key={kino.id}/>
+        <KinoKurilganList kino={kino} key={kino.imdbID}/>
       ))}
     </ul>
   )
@@ -204,8 +251,8 @@ function KinolarKurilganList({kurilganKinolar}){
 function KinoKurilganList({kino}){
   return(
     <li >
-      <img src={kino.rasmi} alt={kino.nomi}></img>
-      <h3>{kino.nomi}</h3>
+      <img src={kino.Poster} alt={kino.Title}></img>
+      <h3>{kino.Title}</h3>
       <div>
         <p>
           <span>⭐️</span>
