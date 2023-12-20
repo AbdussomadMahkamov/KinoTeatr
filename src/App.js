@@ -51,7 +51,7 @@ const KEY="92d61c80"
 
 // fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=Terminator`);
 // .then((e)=>e.json()).then((data)=>console.log(data));
-const query="sdkhkshjk";
+// const query="sdkhkshjk";
 
 export default function App(){
   const [kinolar, setKinolar] = useState(kinolarRuyhati);
@@ -59,6 +59,8 @@ export default function App(){
   const [yuklash, setYuklash] = useState(false);
   const [error, setError] = useState("");
   const [qidiruv, setQidiruv] = useState("");
+  const [tanlangan, setTanlangan] = useState(null);
+
   useEffect(function(){
     
     async function fetchKinolar(){
@@ -66,10 +68,11 @@ export default function App(){
         setYuklash(true);
         setError("");
         const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${qidiruv}`);
-      if(!res.ok) throw new Error("Ma'lumotlarni yuklashda xatolik yuzaga keldi!");
-      const data = await res.json();
-      if(data.Response === 'False') throw new Error("Siz qidirgan kino topilmadi");
-      setKinolar(data.Search);
+        if(!res.ok) throw new Error("Ma'lumotlarni yuklashda xatolik yuzaga keldi!");
+        const data = await res.json();
+        console.log(data.Search);
+        if(data.Response === 'False') throw new Error("Siz qidirgan kino topilmadi");
+        setKinolar(data.Search);
       // console.log(data);
       }
       catch(err){
@@ -78,11 +81,23 @@ export default function App(){
       }
       finally{
         setYuklash(false);
+        if(qidiruv.length<3){
+          setKinolar([]);
+          setError("");
+          return;
+        }
       }
     }
     fetchKinolar();
     
   },[qidiruv])
+
+  function TanlanganKino(id){
+    setTanlangan((tanlangan)=>(id===tanlangan?null:id));
+  }
+  function TanlanganKinoYopish(){
+    setTanlangan(null);
+  }
   
   return(
     <>
@@ -96,12 +111,16 @@ export default function App(){
         <Box>
         {/* { yuklash ? <Yuklovchi/> : <KinolarList kinolar={kinolar}/>} */}
         {yuklash && <Yuklovchi/>}
-        {!yuklash && !error && <KinolarList kinolar={kinolar}/>}
-        {error && qidiruv ? <ErrorMessage message={error} /> : ""}
+        {!yuklash && !error && <KinolarList kinolar={kinolar} TanlanganKino={TanlanganKino} />}
+        {/* {error && qidiruv ? <ErrorMessage message={error} /> : ""} */}
+        {error &&  <ErrorMessage message={error} /> }
         </Box>
         <Box>
-        <Xulosa kurilganKinolar={kurilganKinolar}/>
-          <KinolarKurilganList kurilganKinolar={kurilganKinolar}/>
+        {tanlangan ? <TanlanganKinoInfo tanlangan={tanlangan} TanlanganKinoYopish={TanlanganKinoYopish}/>:
+        <>
+          <Xulosa kurilganKinolar={kurilganKinolar}/>
+          <KinolarKurilganList kurilganKinolar={kurilganKinolar} />
+        </>}
         </Box>
 
         {/* 2-usul */}
@@ -124,6 +143,16 @@ export default function App(){
       </Main>
     </>
   );
+}
+
+function TanlanganKinoInfo({tanlangan,TanlanganKinoYopish}){
+  return(
+    <div className="datails">
+      <button className="btn-back" onClick={TanlanganKinoYopish}> &larr; </button>
+      {tanlangan}
+     console.log({tanlangan})
+    </div>
+  )
 }
 
 function Yuklovchi(){
@@ -211,21 +240,21 @@ function Box({children}){
 //   )
 // }
 
-function KinolarList({kinolar}){
+function KinolarList({kinolar, TanlanganKino}){
   return(
-    <ul className="list">
+    <ul className="list list-movies">
       {
         kinolar.map((kino)=>(
-          <KinoList kino={kino} key={kino.imdbID}/>
+          <KinoList kino={kino} key={kino.imdbID} TanlanganKino={TanlanganKino} />
         ))
       }
     </ul> 
   )
 }
 
-function KinoList({kino}){
+function KinoList({kino, TanlanganKino}){
   return (
-    <li>
+    <li onClick={()=>TanlanganKino(kino.imdbID)}>
       <img src={kino.Poster} alt={kino.Title}/>
       <h3>{kino.Title}</h3>
       <div>
