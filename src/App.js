@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import YulduzchaliBaholash from "./YulduzchaliBaholagich";
 
 const kinolarRuyhati = [
   {
@@ -55,7 +56,7 @@ const KEY="92d61c80"
 
 export default function App(){
   const [kinolar, setKinolar] = useState(kinolarRuyhati);
-  const [kurilganKinolar, setKurilganKinolar] = useState(kurilganKinolarRuyhati);
+  const [kurilganKinolar, setKurilganKinolar] = useState([]);
   const [yuklash, setYuklash] = useState(false);
   const [error, setError] = useState("");
   const [qidiruv, setQidiruv] = useState("");
@@ -98,7 +99,15 @@ export default function App(){
   function TanlanganKinoYopish(){
     setTanlangan(null);
   }
+
+  function KurilganKinolarniQushish(kino){
+    setKurilganKinolar((kurilgan)=>[...kurilgan, kino])
+  }
   
+  function KurilganKinoniUchirish(id){
+    setKurilganKinolar((kurilgan)=>kurilgan.filter((kino)=>kino.imdbID!==id))
+  }
+
   return(
     <>
       <Navbar>
@@ -116,10 +125,16 @@ export default function App(){
         {error &&  <ErrorMessage message={error} /> }
         </Box>
         <Box>
-        {tanlangan ? <TanlanganKinoInfo tanlangan={tanlangan} TanlanganKinoYopish={TanlanganKinoYopish}/>:
+        {tanlangan ? <TanlanganKinoInfo 
+        tanlangan={tanlangan} 
+        TanlanganKinoYopish={TanlanganKinoYopish} 
+        KurilganKinolarniQushish={KurilganKinolarniQushish}
+        kurilganKinolar={kurilganKinolar}/>:
         <>
           <Xulosa kurilganKinolar={kurilganKinolar}/>
-          <KinolarKurilganList kurilganKinolar={kurilganKinolar} />
+          <KinolarKurilganList 
+          kurilganKinolar={kurilganKinolar} 
+          KurilganKinoniUchirish={KurilganKinoniUchirish}/>
         </>}
         </Box>
 
@@ -145,15 +160,146 @@ export default function App(){
   );
 }
 
-function TanlanganKinoInfo({tanlangan,TanlanganKinoYopish}){
-  return(
-    <div className="datails">
-      <button className="btn-back" onClick={TanlanganKinoYopish}> &larr; </button>
-      {tanlangan}
-     console.log({tanlangan})
+// function TanlanganKinoInfo({tanlangan,TanlanganKinoYopish}){
+//   const [kino, SetKino] = useState({});
+//   const [yuklash, setYuklash] = useState(false);
+//   const {
+//     Title:title,
+//     Year:year,
+//     Poster:poster,
+//     Runtime:runtime,
+//     Plot:plot,
+//     Released:released,
+//     Actors:actors,
+//     Director:director,
+//     Genre:genre,
+//     imdbRating,
+//   } = kino;
+//   useEffect(function(){
+//     async function KinoYuklashId(){
+//       setYuklash(true);
+//       const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&i=${tanlangan}`);
+//       const data = await res.json();
+//       console.log(data);
+//       SetKino(data);
+//       setYuklash(false);
+//     }
+//     KinoYuklashId()
+//   },[tanlangan]) 
+//   return(
+//     <div className="datails">
+//       {yuklash ? <Yuklovchi/>:
+//       <>
+//       <header>
+//       <button className="btn-back" onClick={TanlanganKinoYopish}> &larr; </button>
+//       <img src={poster} alt={title}/>
+//       <div className="details-overview">
+//         <h2>{title}</h2>
+//         <p>{released} &bull; {runtime}</p>
+//         <p>{genre}</p>
+//         <p><span>⭐</span>{imdbRating} umumiy baho</p>
+//       </div>
+//       </header>
+//         <section>
+//           <div className="rating">
+//             <YulduzchaliBaholash maxSize={10} size={24} />
+//           </div>
+//           <p><em>{plot}</em></p>
+//           <p>Bosh ro'lda{actors}</p>
+//           <p>{director} tomonidan suratga olingan</p>
+//         </section>
+      
+//       </>}
+//       {/* {tanlangan}
+//      console.log({tanlangan}) */}
+//     </div>
+//   )
+// }
+
+function TanlanganKinoInfo({tanlangan,TanlanganKinoYopish, KurilganKinolarniQushish, kurilganKinolar}){
+  const [kino,setkino] = useState({})
+  const [yuklash,setyuklash] = useState(false)
+  const [userBaho, setUserBaho] = useState("");
+  const baholanganmi = kurilganKinolar.map((kino)=>kino.imdbID).includes(tanlangan);
+  const baholanganKino = kurilganKinolar.find((kino)=>kino.imdbID===tanlangan)?.userBaho;
+  const {
+    Title:title,
+    Year:year,
+    Poster:poster,
+    Runtime:runtime,
+    Plot:plot,
+    Released:released,
+    Actors:actors,
+    Director:director,
+    Genre:genre,
+    imdbRating,
+  } = kino;
+
+  function Qushish(){
+    const YangiKurilganKino = {
+      imdbID: tanlangan,
+      title,
+      year,
+      poster,
+      imdbRating: Number(imdbRating),
+      runtime: Number(runtime.split(" ").at(0)),
+      userBaho
+    }
+    KurilganKinolarniQushish(YangiKurilganKino);
+    TanlanganKinoYopish();
+  }
+  useEffect(function(){
+    async function KinoYuklash(){
+      setyuklash(true)
+      const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&i=${tanlangan}`);
+      const data = await res.json();
+      console.log(data);
+      setkino(data)
+      setyuklash(false)
+    }
+    KinoYuklash();
+  },[tanlangan])
+  return <div className="details">
+    {yuklash?<Yuklovchi/>:
+    <>
+    <header>
+    <button className="btn-back" onClick={TanlanganKinoYopish}>&larr;</button>
+    <img src={poster} alt={title}/>
+    <div className="details-overview">
+      <h2>{title}</h2>
+      <p>{released} &bull; {runtime}</p>
+      <p>{genre}</p>
+      <p><span>⭐️</span>{imdbRating} umumiy baho</p>
     </div>
-  )
+    </header>
+      <section>
+        <div className="rating">
+          {
+            !baholanganmi ?
+            <>
+            <YulduzchaliBaholash maxSize={10} size={24} onSetBaho={setUserBaho}/>
+           
+            {userBaho > 0 &&
+            <button 
+            className="btn-add" 
+            onClick={Qushish} >
+              ➕ Ro'yxatga qo'shish
+              </button>}
+             </> : 
+             <p>Bu kinoni {baholanganKino} 🌟bilan baholagansiz ⚠️</p>
+          }
+        </div>
+        <p><em>{plot}</em></p>
+        <p>Bosh ro'lda {actors}</p>
+        <p>{director} tamonidan suratga olingan</p>
+      </section>
+   
+    </>
 }
+    {/* {tanlangan} */}
+  </div>
+}
+
 
 function Yuklovchi(){
   return <p className="loader">Yuklanmoqda</p>
@@ -267,43 +413,45 @@ function KinoList({kino, TanlanganKino}){
   )
 }
 
-function KinolarKurilganList({kurilganKinolar}){
+function KinolarKurilganList({kurilganKinolar, KurilganKinoniUchirish}){
   return (
     <ul className="list">
       {kurilganKinolar.map((kino)=>(
-        <KinoKurilganList kino={kino} key={kino.imdbID}/>
+        <KinoKurilganList kino={kino} key={kino.imdbID}
+        KurilganKinoniUchirish={KurilganKinoniUchirish}/>
       ))}
     </ul>
   )
 }
 
-function KinoKurilganList({kino}){
+function KinoKurilganList({kino, KurilganKinoniUchirish}){
   return(
     <li >
-      <img src={kino.Poster} alt={kino.Title}></img>
-      <h3>{kino.Title}</h3>
+      <img src={kino.poster} alt={kino.title}></img>
+      <h3>{kino.title}</h3>
       <div>
         <p>
           <span>⭐️</span>
-          <span>{kino.bahoUmumiy} </span>
+          <span>{kino.imdbRating} </span>
         </p>
         <p>
           <span>🌟</span>
-          <span>{kino.bahoUser} </span>
+          <span>{kino.userBaho} </span>
         </p>
         <p>
           <span>⌛️</span>
-          <span>{kino.vaqti} min</span>
+          <span>{kino.runtime} min</span>
         </p>
+        <button className="btn-delete" onClick={()=>KurilganKinoniUchirish(kino.imdbID)}><span>❌</span></button>
       </div>
     </li>
   )
 }
 
 function Xulosa({kurilganKinolar}){
-  const urtachaUmumiyBaho =urtacha(kurilganKinolar.map((kino)=>kino.bahoUmumiy)) ;
-  const urtachaUserBaho = urtacha(kurilganKinolar.map((kino)=>kino.bahoUser));
-  const urtachaVaqt = urtacha(kurilganKinolar.map((kino)=>kino.vaqti));
+  const urtachaUmumiyBaho =urtacha(kurilganKinolar.map((kino)=>kino.imdbRating)) ;
+  const urtachaUserBaho = urtacha(kurilganKinolar.map((kino)=>kino.userBaho));
+  const urtachaVaqt = urtacha(kurilganKinolar.map((kino)=>kino.runtime));
   return (
     <div className="summary">
       <h2>Ko'rilgan kinolar</h2>
@@ -314,11 +462,11 @@ function Xulosa({kurilganKinolar}){
         </p>
         <p>
           <span>⭐️</span>
-          <span>{urtachaUmumiyBaho} </span>
+          <span>{urtachaUmumiyBaho.toFixed(2)} </span>
         </p>
         <p>
           <span>🌟</span>
-          <span>{urtachaUserBaho} </span>
+          <span>{urtachaUserBaho.toFixed(2)} </span>
         </p>
         <p>
           <span>⌛️</span>

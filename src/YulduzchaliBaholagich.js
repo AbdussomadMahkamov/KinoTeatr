@@ -10,11 +10,12 @@ const yulduzchaContainerStyle = {
 }
 
 
-export default function YulduzchaliBaholash({maxSize, color="gold", size=48, xabar=[]}){
+export default function YulduzchaliBaholash({maxSize, color="gold", size=48, xabar=[], onSetBaho}){
     const [baho, SetBaho] = useState(0);
     const [tempBaho, setTempBaho] = useState(0);
     function Baholash(baholash){
         SetBaho(baholash);
+        onSetBaho(baholash);
     }
     const textStyle = {
         lineHeight:"1",
